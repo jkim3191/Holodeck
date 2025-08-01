@@ -103,7 +103,7 @@ class WallGenerator:
         wall_height_prompt = self.wall_height_template.format(input=scene["query"])
 
         if "wall_height" not in scene:
-            wall_height = self.llm(wall_height_prompt).split("\n")[0].strip()
+            wall_height = self.llm.invoke(wall_height_prompt).content.split("\n")[0].strip()
 
             try:
                 wall_height = float(wall_height)

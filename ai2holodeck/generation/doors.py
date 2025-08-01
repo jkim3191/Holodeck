@@ -98,7 +98,7 @@ class DoorGenerator:
 
         # generate raw doorway plan if not exist
         if "raw_doorway_plan" not in scene:
-            raw_doorway_plan = self.llm(doorway_prompt)
+            raw_doorway_plan = self.llm.invoke(doorway_prompt).content
         else:
             raw_doorway_plan = scene["raw_doorway_plan"]
 

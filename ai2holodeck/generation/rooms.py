@@ -48,7 +48,7 @@ class FloorPlanGenerator:
             input=scene["query"], additional_requirements=additional_requirements
         )
         if "raw_floor_plan" not in scene:
-            raw_floor_plan = self.llm(floor_plan_prompt)
+            raw_floor_plan = self.llm.invoke(floor_plan_prompt).content
             scene["raw_floor_plan"] = raw_floor_plan
         else:
             raw_floor_plan = scene["raw_floor_plan"]

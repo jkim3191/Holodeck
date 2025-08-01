@@ -42,7 +42,7 @@ class CeilingObjectGenerator:
         )
 
         if "raw_ceiling_plan" not in scene:
-            raw_ceiling_plan = self.llm(ceiling_prompt)
+            raw_ceiling_plan = self.llm.invoke(ceiling_prompt).content
         else:
             raw_ceiling_plan = scene["raw_ceiling_plan"]
 

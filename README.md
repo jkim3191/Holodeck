@@ -39,9 +39,19 @@ by default these will save to `~/.objathor-assets/...`, you can change this dire
 
 ## Usage
 You can use the following command to generate a new environment.
+
+```bash
+python ai2holodeck/main.py --query "a living room"
 ```
-python holodeck/main.py --query "a living room" --openai_api_key <OPENAI_API_KEY>
+
+```bash
+python ai2holodeck/main.py --query "a living room" --llm_model openrouter/openai/gpt-4.1-mini
 ```
+
+```bash
+debugpy ai2holodeck/main.py --query "a living room" --llm_model openrouter/openai/gpt-4.1-mini
+```
+
 Our system uses `gpt-4o-2024-05-13`, **so please ensure you have access to it.**
 
 **Note:** To yield better layouts, use `DFS` as the solver. If you pull the repo before `12/28/2023`, you must set the [argument](https://github.com/allenai/Holodeck/blob/386b0a868def29175436dc3b1ed85b6309eb3cad/main.py#L78) `--use_milp` to `False` to use `DFS`.

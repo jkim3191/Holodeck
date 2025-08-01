@@ -56,7 +56,7 @@ class WindowGenerator:
         )
 
         if "raw_window_plan" not in scene:
-            raw_window_plan = self.llm(window_prompt)
+            raw_window_plan = self.llm.invoke(window_prompt).content
         else:
             raw_window_plan = scene["raw_window_plan"]
 

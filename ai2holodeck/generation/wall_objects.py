@@ -113,7 +113,7 @@ class WallObjectGenerator:
             wall_objects=", ".join(wall_object_names),
         )
         if self.constraint_type == "llm" and use_constraint:
-            constraint_plan = self.llm(constraints_prompt)
+            constraint_plan = self.llm.invoke(constraints_prompt).content
         else:
             constraint_plan = ""
             for object_name in wall_object_names:
