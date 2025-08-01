@@ -10,7 +10,8 @@ import time
 import editdistance
 import matplotlib.pyplot as plt
 import numpy as np
-from langchain import PromptTemplate, OpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_community.llms.openai import OpenAI
 from rtree import index
 from scipy.interpolate import interp1d
 from shapely.geometry import Polygon, Point, box, LineString
@@ -1290,7 +1291,6 @@ class DFS_Solver_Floor:
 
             # use cvxpy to solve for the hard constraints
             for object_name, object_dim in objects_list:
-
                 # by default - add soft edge constraints although this might make the solver take a longer time
                 if not any(
                     constraint["type"] == "global"

@@ -8,7 +8,8 @@ import numpy as np
 import torch
 from PIL import Image
 from colorama import Fore
-from langchain import PromptTemplate, OpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_community.llms.openai import OpenAI
 from tqdm import tqdm
 
 import ai2holodeck.generation.prompts as prompts

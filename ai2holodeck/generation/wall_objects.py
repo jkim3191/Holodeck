@@ -6,7 +6,8 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from langchain import PromptTemplate, OpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_community.llms.openai import OpenAI
 from shapely.geometry import Polygon, box, Point, LineString
 from shapely.ops import substring
 
@@ -607,9 +608,10 @@ class DFS_Solver_Wall:
         # draw the solutions
         for object_name, solution in solutions.items():
             vertex_min, vertex_max, rotation, box_coords = solution[:-1]
-            center_x, center_y = (vertex_min[0] + vertex_max[0]) / 2, (
-                vertex_min[2] + vertex_max[2]
-            ) / 2
+            center_x, center_y = (
+                (vertex_min[0] + vertex_max[0]) / 2,
+                (vertex_min[2] + vertex_max[2]) / 2,
+            )
 
             # create a polygon for the solution
             obj_poly = Polygon(box_coords)

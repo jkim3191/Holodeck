@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 from ai2thor.controller import Controller
 from ai2thor.hooks.procedural_asset_hook import ProceduralAssetHookRunner
-from moviepy.editor import (
+from moviepy import (
     TextClip,
     CompositeVideoClip,
     concatenate_videoclips,

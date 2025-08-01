@@ -4,7 +4,8 @@ from typing import Optional, Dict, Any, Tuple
 
 import compress_json
 import open_clip
-from langchain.llms import OpenAI
+from langchain_litellm import ChatLiteLLM
+# from litellm import LiteLLM
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
@@ -68,8 +69,8 @@ class Holodeck:
             os.environ["OPENAI_ORG"] = openai_org
 
         # initialize llm
-        self.llm = OpenAI(
-            model_name=llm_model_name,
+        self.llm = ChatLiteLLM(
+            model=llm_model_name if llm_model_name is not None else LLM_MODEL_NAME,
             max_tokens=2048,
             openai_api_key=openai_api_key,
         )

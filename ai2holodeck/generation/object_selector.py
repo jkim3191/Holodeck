@@ -10,7 +10,8 @@ from typing import Dict, List
 import torch
 import torch.nn.functional as F
 from colorama import Fore
-from langchain import PromptTemplate, OpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_community.llms.openai import OpenAI
 from shapely import Polygon
 
 import ai2holodeck.generation.prompts as prompts
@@ -154,7 +155,7 @@ class ObjectSelector:
         print(f"\n{Fore.GREEN}AI: Selecting objects for {room_type}...{Fore.RESET}\n")
 
         result = {}
-        room_size_str = f"{int(room2size[room_type][0])*100}cm in length, {int(room2size[room_type][1])*100}cm in width, {int(room2size[room_type][2])*100}cm in height"
+        room_size_str = f"{int(room2size[room_type][0]) * 100}cm in length, {int(room2size[room_type][1]) * 100}cm in width, {int(room2size[room_type][2]) * 100}cm in height"
 
         prompt_1 = (
             self.object_selection_template_1.replace("INPUT", scene["query"])
@@ -192,7 +193,7 @@ class ObjectSelector:
         else:
             print(
                 f"{Fore.RED}AI: The used floor capacity of {room_type} is {floor_capacity[1]:.2g}m^2,"
-                f" which is less than {100*required_floor_capacity_percentage:.0f}% of the total floor capacity"
+                f" which is less than {100 * required_floor_capacity_percentage:.0f}% of the total floor capacity"
                 f" {floor_capacity[0]:.2g}m^2."
                 f"{Fore.RESET}"
             )
