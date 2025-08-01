@@ -60,6 +60,7 @@ class Holodeck:
         openai_org: Optional[str],
         objaverse_asset_dir: str,
         single_room,
+        llm_model_name: str = LLM_MODEL_NAME,
     ):
         confirm_paths_exist()
 
@@ -68,7 +69,7 @@ class Holodeck:
 
         # initialize llm
         self.llm = OpenAI(
-            model_name=LLM_MODEL_NAME,
+            model_name=llm_model_name,
             max_tokens=2048,
             openai_api_key=openai_api_key,
         )

@@ -178,6 +178,11 @@ if __name__ == "__main__":
         help="Whether to generate a single room scene.",
         default="False",
     )
+    parser.add_argument(
+        "--llm_model",
+        help="LLM model to use for generation.",
+        default=None,
+    )
 
     args = parser.parse_args()
 
@@ -192,6 +197,7 @@ if __name__ == "__main__":
         openai_org=args.openai_org,
         objaverse_asset_dir=OBJATHOR_ASSETS_DIR,
         single_room=ast.literal_eval(args.single_room),
+        llm_model_name=args.llm_model,
     )
 
     if args.used_assets != [] and args.used_assets.endswith(".txt"):
