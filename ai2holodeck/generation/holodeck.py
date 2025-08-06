@@ -70,7 +70,7 @@ class Holodeck:
         self.llm = OpenAI(
             model_name=LLM_MODEL_NAME,
             max_tokens=2048,
-            openai_api_key=openai_api_key,
+            # openai_api_key=openai_api_key,
         )
 
         # initialize CLIP
