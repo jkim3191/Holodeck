@@ -57,7 +57,7 @@ class DoorGenerator:
         try:
             self.door_feature_clip = compress_pickle.load(
                 os.path.join(HOLODECK_BASE_DATA_DIR, "doors/door_feature_clip.pkl")
-            )
+            ).to("cuda")
         except:
             print("Precompute image features for doors...")
             self.door_feature_clip = []
@@ -422,7 +422,7 @@ class DoorGenerator:
     def select_door(self, door_type, door_size, query):
         with torch.no_grad():
             query_feature_clip = self.clip_model.encode_text(
-                self.clip_tokenizer([query])
+                self.clip_tokenizer([query]).to("cuda")
             )
             query_feature_clip /= query_feature_clip.norm(dim=-1, keepdim=True)
 

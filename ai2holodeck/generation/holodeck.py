@@ -79,7 +79,7 @@ class Holodeck:
             _,
             self.clip_preprocess,
         ) = open_clip.create_model_and_transforms(
-            "ViT-L-14", pretrained="laion2b_s32b_b82k", device="cuda"
+            "ViT-L-14", pretrained="laion2b_s32b_b82k",
         )
         self.clip_tokenizer = open_clip.get_tokenizer("ViT-L-14")
 

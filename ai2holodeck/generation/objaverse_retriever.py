@@ -71,10 +71,14 @@ class ObjathorRetriever:
 
         self.asset_ids = objathor_uids + thor_uids
 
-        self.clip_model = clip_model
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.clip_model = clip_model.to(self.device)
         self.clip_preprocess = clip_preprocess
         self.clip_tokenizer = clip_tokenizer
-        self.sbert_model = sbert_model
+        self.sbert_model = sbert_model.to(self.device)
+
+        self.clip_features = self.clip_features.to(self.device)
+        self.sbert_features = self.sbert_features.to(self.device)
 
         self.retrieval_threshold = retrieval_threshold
 
@@ -83,7 +87,7 @@ class ObjathorRetriever:
     def retrieve(self, queries, threshold=28):
         with torch.no_grad():
             query_feature_clip = self.clip_model.encode_text(
-                self.clip_tokenizer(queries)
+                self.clip_tokenizer(queries).to("cuda")
             )
 
             query_feature_clip = F.normalize(query_feature_clip, p=2, dim=-1)

@@ -375,6 +375,7 @@ class MaterialSelector:
                     HOLODECK_BASE_DATA_DIR, "materials/material_feature_clip.pkl"
                 )
             )
+            self.material_feature_clip = self.material_feature_clip.to("cuda")
         except:
             print("Precompute image features for materials...")
             self.material_feature_clip = []
@@ -401,12 +402,12 @@ class MaterialSelector:
         try:
             self.color_feature_clip = compress_pickle.load(
                 os.path.join(HOLODECK_BASE_DATA_DIR, "materials/color_feature_clip.pkl")
-            )
+            ).to("cuda")
         except:
             print("Precompute text features for colors...")
             with torch.no_grad():
                 self.color_feature_clip = self.clip_model.encode_text(
-                    self.clip_tokenizer(self.colors)
+                    self.clip_tokenizer(self.colors).to("cuda")
                 )
                 self.color_feature_clip /= self.color_feature_clip.norm(
                     dim=-1, keepdim=True
@@ -422,7 +423,7 @@ class MaterialSelector:
     def match_material(self, queries, topk=5):
         with torch.no_grad():
             query_feature_clip = self.clip_model.encode_text(
-                self.clip_tokenizer(queries)
+                self.clip_tokenizer(queries).to("cuda")
             )
             query_feature_clip /= query_feature_clip.norm(dim=-1, keepdim=True)
 
@@ -435,7 +436,7 @@ class MaterialSelector:
                 ]
                 for query in queries
             ]
-        )
+        ).to("cuda")
 
         joint_similarity = (
             string_similarity + clip_similarity
@@ -452,7 +453,7 @@ class MaterialSelector:
     def select_color(self, queries, topk=5):
         with torch.no_grad():
             query_feature_clip = self.clip_model.encode_text(
-                self.clip_tokenizer(queries)
+                self.clip_tokenizer(queries).to("cuda")
             )
             query_feature_clip /= query_feature_clip.norm(dim=-1, keepdim=True)
         clip_similarity = query_feature_clip @ self.color_feature_clip.T
