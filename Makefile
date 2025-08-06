@@ -13,5 +13,9 @@ test: ## [Local development] Run unit tests
 
 .PHONY: help
 
+profile: ## [Local development] Profile with py-spy and generate a flamegraph
+	py-spy record -o profile.svg --subprocesses --pid $(pgrep -f "python.*main.py")
+	py-spy record -o profile.svg --subprocesses -- python ai2holodeck/main.py
+
 help: # Run `make help` to get help on the make commands
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
