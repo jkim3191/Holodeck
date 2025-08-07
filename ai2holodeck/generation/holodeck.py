@@ -72,7 +72,7 @@ class Holodeck:
         self.llm = ChatLiteLLM(
             model=llm_model_name if llm_model_name is not None else LLM_MODEL_NAME,
             max_tokens=2048,
-            openai_api_key=openai_api_key,
+            # openai_api_key=openai_api_key,
         )
 
         # initialize CLIP
@@ -81,7 +81,7 @@ class Holodeck:
             _,
             self.clip_preprocess,
         ) = open_clip.create_model_and_transforms(
-            "ViT-L-14", pretrained="laion2b_s32b_b82k"
+            "ViT-L-14", pretrained="laion2b_s32b_b82k", device="cuda"
         )
         self.clip_tokenizer = open_clip.get_tokenizer("ViT-L-14")
 

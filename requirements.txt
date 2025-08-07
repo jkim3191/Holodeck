@@ -1,29 +1,55 @@
-cvxpy
-cchardet
-pillow
-colorama
+# Last updated versions as of December 2023
+cvxpy==1.4.1
+cchardet==2.1.7
+Pillow==10.1.0
+colorama==0.4.6
 open-clip-torch
-transformers
-shapely
-sentence-transformers
+transformers==4.38.2
+shapely==2.0.2
+sentence-transformers==2.3.1
 prior
 procthor
 objaverse
-rtree
-scipy
-moviepy
-numpy
-langchain-community
-langchain-litellm
-langchain
-litellm
+rtree==1.1.0
+scipy==1.11.4
+moviepy==1.0.3
+numpy==1.26.2
+openai==0.27.6
+langchain==0.0.354
 torch
 torchvision
-gurobipy
-Werkzeug
-Flask
+gurobipy==10.0.3
+Werkzeug==3.0.1
+Flask==3.0.1
 compress-pickle
-compress-json
-black
+compress-json==1.1.0
+black==23.12.1
 objathor
-editdistance
+editdistance==0.6.2
+# cvxpy
+# cchardet
+# pillow
+# colorama
+# open-clip-torch
+# transformers
+# shapely
+# sentence-transformers
+# prior
+# procthor
+# objaverse
+# rtree
+# scipy
+# moviepy
+# numpy
+# openai==0.27.6
+# langchain==0.0.171
+# torch==1.13.1
+# torchvision==0.14.1
+# gurobipy==10.0.3
+# Werkzeug==2.0.1
+# Flask==2.0.1
+# compress-pickle
+# compress-json
+# black
+# objathor
+# editdistance

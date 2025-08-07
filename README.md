@@ -41,7 +41,7 @@ by default these will save to `~/.objathor-assets/...`, you can change this dire
 You can use the following command to generate a new environment.
 
 ```bash
-python ai2holodeck/main.py --query "a living room"
+python ai2holodeck/main.py --query "a living room" --openai_api_key <OPENAI_API_KEY>
 ```
 
 ```bash
