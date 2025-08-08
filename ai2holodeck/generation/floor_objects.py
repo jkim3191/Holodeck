@@ -15,6 +15,7 @@ from langchain_community.llms.openai import OpenAI
 from rtree import index
 from scipy.interpolate import interp1d
 from shapely.geometry import Polygon, Point, box, LineString
+from typing import List, Dict, Tuple
 
 import ai2holodeck.generation.prompts as prompts
 from ai2holodeck.generation.milp_utils import *
@@ -51,6 +52,8 @@ class FloorObjectGenerator:
         self.constraint_type = "llm"
         self.use_milp = False
         self.multiprocessing = False
+        # scale factor applied to all constraint weights (1.0 = default strength)
+        self.constraint_strength = 1.0
 
     def generate_objects(self, scene, use_constraint=True):
         rooms = scene["rooms"]
@@ -173,6 +176,7 @@ class FloorObjectGenerator:
             all_is_placed = False
             while not all_is_placed:
                 completion_text = self.llm.invoke(baseline_prompt)
+                completion_text = completion_text.content if hasattr(completion_text, 'content') else str(completion_text)
                 try:
                     completion_text = re.findall(
                         r"```(.*?)```", completion_text, re.DOTALL
@@ -211,7 +215,108 @@ class FloorObjectGenerator:
                     placements.append(placement)
                 break  # only one iteration
 
+        # When constraints are disabled, lightly resolve any overlaps to avoid clutter
+        if not use_constraint and placements:
+            placements = self.resolve_overlaps_llm(
+                placements=placements,
+                room_vertices=room["vertices"],
+            )
+
         return placements
+
+    def resolve_overlaps_llm(
+        self,
+        placements: List[Dict[str, any]],
+        room_vertices: List[Tuple[float, float]],
+        max_iterations: int = 50,
+        step_meters: float = 0.05,
+        clearance_meters: float = 0.02,
+    ) -> List[Dict[str, any]]:
+        """Post-process LLM placements by nudging only overlapping objects apart.
+
+        - Operates in meters (same units as placement positions and bbox dims).
+        - Keeps objects inside room bounds while moving.
+        - Minimal, local adjustments; preserves general layout.
+        """
+
+        def rect_polygon(cx: float, cz: float, sx: float, sz: float, rot_deg: int) -> Polygon:
+            half_x = (sx / 2.0) - clearance_meters
+            half_z = (sz / 2.0) - clearance_meters
+            corners = [(-half_x, -half_z), (half_x, -half_z), (half_x, half_z), (-half_x, half_z)]
+            theta = math.radians(rot_deg % 360)
+            cos_t, sin_t = math.cos(theta), math.sin(theta)
+            rotated = [
+                (
+                    cx + c[0] * cos_t - c[1] * sin_t,
+                    cz + c[0] * sin_t + c[1] * cos_t,
+                )
+                for c in corners
+            ]
+            return Polygon(rotated)
+
+        min_x = min(v[0] for v in room_vertices)
+        max_x = max(v[0] for v in room_vertices)
+        min_z = min(v[1] for v in room_vertices)
+        max_z = max(v[1] for v in room_vertices)
+
+        def clamp_within_room(x: float, z: float, sx: float, sz: float) -> Tuple[float, float]:
+            half_x = sx / 2.0
+            half_z = sz / 2.0
+            x = max(min_x + half_x, min(max_x - half_x, x))
+            z = max(min_z + half_z, min(max_z - half_z, z))
+            return x, z
+
+        # Pre-compute sizes
+        name_to_size: Dict[str, Tuple[float, float]] = {}
+        for p in placements:
+            dim = get_bbox_dims(self.database[p["assetId"]])
+            name_to_size[p["id"]] = (dim["x"], dim["z"])  # meters
+
+        # Iteratively nudge objects that overlap with already placed polygons
+        for _ in range(max_iterations):
+            any_change = False
+            polygons: Dict[str, Polygon] = {}
+            for p in placements:
+                sx, sz = name_to_size[p["id"]]
+                cx, cz = p["position"]["x"], p["position"]["z"]
+                rot = int(p["rotation"].get("y", 0))
+                polygons[p["id"]] = rect_polygon(cx, cz, sx, sz, rot)
+
+            for i, p_i in enumerate(placements):
+                id_i = p_i["id"]
+                poly_i = polygons[id_i]
+                for j, p_j in enumerate(placements):
+                    if j >= i:
+                        continue
+                    id_j = p_j["id"]
+                    poly_j = polygons[id_j]
+                    if not poly_i.intersects(poly_j):
+                        continue
+                    # Move i away from j along center-to-center vector
+                    cx_i, cz_i = p_i["position"]["x"], p_i["position"]["z"]
+                    cx_j, cz_j = p_j["position"]["x"], p_j["position"]["z"]
+                    vec_x, vec_z = cx_i - cx_j, cz_i - cz_j
+                    norm = math.hypot(vec_x, vec_z)
+                    if norm == 0:
+                        vec_x, vec_z = 1.0, 0.0
+                        norm = 1.0
+                    vec_x /= norm
+                    vec_z /= norm
+                    new_x = cx_i + vec_x * step_meters
+                    new_z = cz_i + vec_z * step_meters
+                    sx_i, sz_i = name_to_size[id_i]
+                    new_x, new_z = clamp_within_room(new_x, new_z, sx_i, sz_i)
+                    p_i["position"]["x"] = new_x
+                    p_i["position"]["z"] = new_z
+                    polygons[id_i] = rect_polygon(new_x, new_z, sx_i, sz_i, int(p_i["rotation"].get("y", 0)))
+                    any_change = True
+
+            if not any_change:
+                break
+
+        return placements
+
+        
 
     def get_door_window_placements(
         self, doors, windows, room_vertices, open_walls, add_window=True
@@ -478,14 +583,20 @@ class DFS_Solver_Floor:
             "distance": self.place_distance,
         }
 
+        # self.constraint_type2weight = {
+        #     "global": 1.0,
+        #     "relative": 0.5,
+        #     "direction": 0.5,
+        #     "alignment": 0.5,
+        #     "distance": 1.8,
+        # }
         self.constraint_type2weight = {
-            "global": 1.0,
-            "relative": 0.5,
+            "global": 0.01,
+            "relative": 0.01,
             "direction": 0.5,
-            "alignment": 0.5,
-            "distance": 1.8,
+            "alignment": 0.01,
+            "distance": 0.01,
         }
-
         self.edge_bouns = 0.0  # worth more than one constraint
 
     def get_solution(
@@ -662,6 +773,7 @@ class DFS_Solver_Floor:
             )
 
             weight = self.constraint_type2weight[constraint["type"]]
+            # weight = self.constraint_type2weight[constraint["type"]] * getattr(self, "constraint_strength", 1.0)
             if constraint["type"] == "distance":
                 for solution in valid_solutions:
                     bouns = solution[-1]
